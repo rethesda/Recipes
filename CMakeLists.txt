@@ -14,7 +14,7 @@ endif()
 
 set(NAME "Recipes")
 set(AUTHOR "nightfallstorm")
-set(VERSION 1.1.0)
+set(VERSION 1.2.0)
 
 
 # For Clang-CL only, ensures IDEs like CLION properly see CLIB-NG headers
