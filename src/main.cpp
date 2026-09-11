@@ -43,7 +43,6 @@ namespace
 		auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
 
 		log->set_level(spdlog::level::info);
-		log->flush_on(spdlog::level::info);
 
 		spdlog::set_default_logger(std::move(log));
 		spdlog::set_pattern("[%H:%M:%S:%e] %v"s);

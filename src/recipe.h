@@ -5,13 +5,6 @@
 
 namespace Recipe
 {
-	static void learnEffect(RE::IngredientItem* a_ingredient, std::uint32_t a_aiIndex)
-	{
-		// TODO: This is in PO3 CLIB, grab from CLIB-NG once updated
-		a_ingredient->gamedata.knownEffectFlags |= 1 << a_aiIndex;
-		a_ingredient->AddChange(0x80000000);
-	}
-
 	static bool hasLearnedEffect(RE::IngredientItem* a_ingredient, std::uint32_t a_aiIndex)
 	{
 		// TODO: This is in PO3 CLIB, grab from CLIB-NG once updated
@@ -36,7 +29,7 @@ namespace Recipe
 		{
 			std::vector<RE::IngredientItem*> ingredients;
 			for (auto line : getRecipeLines()) {
-				if (line.find("~") != std::string::npos) {
+				if (line.find('~') != std::string::npos) {
 					RE::IngredientItem* bestMatchingIngredient = nullptr;
 					for (auto ingredient : DataBase::GetSingleton()->ingredients) {
 						if (stl::string::icontains(line, ingredient->GetFullName())) {
@@ -94,7 +87,7 @@ namespace Recipe
 						logger::info("Check effect {}, against recipeEffect", effect->baseEffect->GetFullName());
 						if (recipeEffect.find(effect->baseEffect->GetFullName()) != std::string::npos && effect->baseEffect->GetFullNameLength() != 0) {
 							if (!hasLearnedEffect(ingredient, index)) {
-								learnEffect(ingredient, index);
+								ingredient->LearnEffect(index);
 								RE::SendHUDMessage::ShowHUDMessage(std::format("Discovered {} in {}", effect->baseEffect->GetFullName(), ingredient->GetFullName()).c_str());
 								learnedEffect = true;
 							}

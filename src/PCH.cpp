@@ -1,3 +1,6 @@
+#include "REL/Relocation.h"
+
+#include <span>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <xbyak/xbyak.h>
 

@@ -43,7 +43,7 @@ private:
 				ingredients.push_back(form->As<RE::IngredientItem>());
 			} else if (form->Is(RE::AlchemyItem::FORMTYPE)) {
 				auto name = std::string(form->As<RE::AlchemyItem>()->GetFullName());
-				std::transform(name.begin(), name.end(), name.begin(), ::toupper);
+				std::ranges::transform(name, name.begin(), ::toupper);
 				if (name.find("POTION") != std::string::npos || name.find("POISON") != std::string::npos) {
 					for (auto effect : form->As<RE::AlchemyItem>()->effects) {
 						effects.insert(effect->baseEffect);

@@ -1,6 +1,5 @@
 #pragma once
 #include "PCH.h"
-#include "database.h"
 #include "recipe.h"
 
 struct RecipeReadWorldHook
@@ -35,8 +34,7 @@ struct RecipeReadInventoryHook
 	{
 		logger::info("RecipeReadInventoryHook triggered!");
 
-		auto book = skyrim_cast<RE::TESObjectBOOK*, RE::TESDescription>(a_description);
-		if (book && Recipe::isBookRecipe(book)) {
+		if (const auto book = skyrim_cast<RE::TESObjectBOOK*, RE::TESDescription>(a_description); book && Recipe::isBookRecipe(book)) {
 			logger::info("RecipeReadInventoryHook is recipe!");
 			reinterpret_cast<Recipe::BookRecipe*>(book)->learnIngredients();
 		}
