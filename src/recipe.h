@@ -95,7 +95,7 @@ namespace Recipe
 						if (recipeEffect.find(effect->baseEffect->GetFullName()) != std::string::npos && effect->baseEffect->GetFullNameLength() != 0) {
 							if (!hasLearnedEffect(ingredient, index)) {
 								learnEffect(ingredient, index);
-								RE::DebugNotification(std::format("Discovered {} in {}", effect->baseEffect->GetFullName(), ingredient->GetFullName()).c_str());
+								RE::SendHUDMessage::ShowHUDMessage(std::format("Discovered {} in {}", effect->baseEffect->GetFullName(), ingredient->GetFullName()).c_str());
 								learnedEffect = true;
 							}
 						}

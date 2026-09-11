@@ -1,2 +1,6 @@
 build*/
 /.vs
+.idea/
+
+# Ignore local build environment
+local-env.cmake

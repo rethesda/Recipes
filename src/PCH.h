@@ -5,15 +5,6 @@
 #include "RE/Skyrim.h"
 #include "SKSE/SKSE.h"
 
-#pragma warning(disable: 4100)
-
-#pragma warning(push)
-#include <SimpleIni.h>
-#include <robin_hood.h>
-#include <spdlog/sinks/basic_file_sink.h>
-#include <xbyak/xbyak.h>
-#pragma warning(pop)
-
 namespace logger = SKSE::log;
 
 using namespace std::literals;
@@ -34,8 +25,6 @@ namespace stl
 	void write_thunk_call(std::uintptr_t a_src)
 	{
 		auto& trampoline = SKSE::GetTrampoline();
-		SKSE::AllocTrampoline(14);
-
 		T::func = trampoline.write_call<5>(a_src, T::thunk);
 	}
 
@@ -107,20 +96,4 @@ namespace stl
 	}
 }
 
-#ifdef SKYRIM_AE
-#	define REL_ID(se, ae) REL::ID(ae)
-#	define OFFSET(se, ae) ae
-#	define OFFSET_3(se, ae, vr) ae
-#elif SKYRIMVR
-#	define REL_ID(se, ae) REL::ID(se)
-#	define OFFSET(se, ae) se
-#	define OFFSET_3(se, ae, vr) vr
-#else
-#	define REL_ID(se, ae) REL::ID(se)
-#	define OFFSET(se, ae) se
-#	define OFFSET_3(se, ae, vr) se
-#endif
-
 #define DLLEXPORT __declspec(dllexport)
-
-#include "Version.h"

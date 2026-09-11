@@ -94,7 +94,7 @@ struct ValidateBookAE
 {
 	// AE inlines GetDescription, so we have to use a new hook right after the check for the parent form
 	// so we can validate that parent form is a book recipe
-	static void thunk(RE::BSString* a_out, RE::TESForm* a_parent, std::uint64_t a_unk)
+	static void thunk(RE::BSString* a_out, RE::TESForm* a_parent, [[maybe_unused]] std::uint64_t a_unk)
 	{
 		func(a_out, nullptr, 0); // Invoke original (BSString::Set(a_out, 0, 0)
 #ifdef _DEBUG

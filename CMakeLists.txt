@@ -1,39 +1,16 @@
 cmake_minimum_required(VERSION 3.20)
 set(NAME "Recipes")
+set(AUTHOR "nightfallstorm")
 set(VERSION 1.1.0)
 
-# ---- Cache build vars ----
-
-macro(set_from_environment VARIABLE)
-	if (NOT DEFINED ${VARIABLE} AND DEFINED ENV{${VARIABLE}})
-		set(${VARIABLE} $ENV{${VARIABLE}})
-	endif ()
-endmacro()
-
-set_from_environment(VCPKG_ROOT)
-set(CommonLibName "CommonLibSSE")
-set_from_environment(Skyrim64Path)
-set(SkyrimPath ${Skyrim64Path})
-set(SkyrimVersion "Skyrim SSE")
-
-message(
-	STATUS
-	"Building ${NAME} ${VERSION}."
-)
-
-if (DEFINED VCPKG_ROOT)
-	set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
-	set(VCPKG_TARGET_TRIPLET "x64-windows-static" CACHE STRING "")
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/local-env.cmake)
+	include(${CMAKE_CURRENT_SOURCE_DIR}/local-env.cmake)
 else ()
 	message(
-		WARNING
-		"Variable VCPKG_ROOT is not set. Continuing without vcpkg."
+			FATAL_ERROR
+			"local-env.cmake not found. This is required for proper linux cross-compiling. See `local-env-TEMPLATE.cmake` for details"
 	)
-endif ()
-
-set(Boost_USE_STATIC_RUNTIME OFF CACHE BOOL "")
-
-# ---- Project ----
+endif()
 
 project(
 	${NAME}
@@ -55,11 +32,8 @@ configure_file(
 
 # ---- Include guards ----
 
-if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
-	message(
-		FATAL_ERROR
-			"In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there."
-	)
+if("${PROJECT_SOURCE_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
+	message(FATAL_ERROR "in-source builds are not allowed")
 endif()
 
 # ---- Globals ----
@@ -68,26 +42,26 @@ add_compile_definitions(
 	SKSE_SUPPORT_XBYAK
 )
 
-if (MSVC)
-	if (NOT ${CMAKE_GENERATOR} STREQUAL "Ninja")
-		add_compile_options(
-			/MP	# Build with Multiple Processes
-		)
-	endif ()
-endif ()
-
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
-
-set(Boost_USE_STATIC_LIBS ON)
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE STRING "")
 
 # ---- Dependencies ----
 
-find_package(CommonLibSSE CONFIG REQUIRED)
+set(CommonLibName "CommonLibSSE")
 
-find_package(robin_hood CONFIG REQUIRED)
+if (DEFINED CLIB_PATH AND NOT ${CLIB_PATH} STREQUAL "" AND IS_DIRECTORY ${CLIB_PATH})
+	add_subdirectory(${CLIB_PATH} ${CommonLibName} EXCLUDE_FROM_ALL)
+else ()
+	message(
+		FATAL_ERROR
+		"Variable CLIB_PATH is not found. Value is ${CLIB_PATH}"
+	)
+endif()
+
 find_path(SIMPLEINI_INCLUDE_DIRS "ConvertUTF.c")
+
+FetchContent_Declare(rapidfuzz
+		GIT_REPOSITORY https://github.com/rapidfuzz/rapidfuzz-cpp.git
+		GIT_TAG main)
+FetchContent_MakeAvailable(rapidfuzz)
 
 # ---- Add source files ----
 
@@ -121,7 +95,6 @@ add_library(
 	${CMAKE_CURRENT_BINARY_DIR}/version.rc
 	.clang-format
 )
-add_subdirectory(rapidfuzz-cpp)
 
 target_compile_features(
 	${PROJECT_NAME}
@@ -147,7 +120,6 @@ target_link_libraries(
 	${PROJECT_NAME}
 	PRIVATE
 		${CommonLibName}::${CommonLibName}
-		robin_hood::robin_hood
 		rapidfuzz::rapidfuzz
 )
 
@@ -193,6 +165,7 @@ if (MSVC)
 			/external:W0
 
 			/W4	# Warning level
+			/WX # Warning level (warnings are errors)
 
 			"$<$<CONFIG:DEBUG>:>"
 			"$<$<CONFIG:RELEASE>:/Zc:inline;/JMC-;/Ob3>"
