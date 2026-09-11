@@ -5,13 +5,13 @@
 
 namespace Recipe
 {
-	static bool hasLearnedEffect(RE::IngredientItem* a_ingredient, std::uint32_t a_aiIndex)
+	static bool hasLearnedEffect(const RE::IngredientItem* a_ingredient, const std::uint32_t a_aiIndex)
 	{
 		// TODO: This is in PO3 CLIB, grab from CLIB-NG once updated
 		return (a_ingredient->gamedata.knownEffectFlags & (1 << a_aiIndex)) != 0;
 	}
 
-	static bool isBookRecipe(RE::TESObjectBOOK* a_book)
+	static bool isBookRecipe(const RE::TESObjectBOOK* a_book)
 	{
 		return a_book->HasKeyword(DataBase::GetSingleton()->vendorItemRecipeKeyword);
 	}
@@ -22,7 +22,7 @@ namespace Recipe
 		{
 			RE::BSString description;
 			this->GetDescription(description, this);
-			return std::string(description.c_str());
+			return description.c_str();
 		}
 
 		std::vector<RE::IngredientItem*> getIngredients()
@@ -31,7 +31,7 @@ namespace Recipe
 			for (auto line : getRecipeLines()) {
 				if (line.find('~') != std::string::npos) {
 					RE::IngredientItem* bestMatchingIngredient = nullptr;
-					for (auto ingredient : DataBase::GetSingleton()->ingredients) {
+					for (const auto ingredient : DataBase::GetSingleton()->ingredients) {
 						if (stl::string::icontains(line, ingredient->GetFullName())) {
 							if (!bestMatchingIngredient || bestMatchingIngredient->GetFullNameLength() < ingredient->GetFullNameLength()) {
 								// Some ingredients like Watcher's Eye match both Watcher's eye and Blind Watcher's Eye, so get the best match
@@ -56,7 +56,7 @@ namespace Recipe
 		std::string getRecipeEffectName()
 		{
 			std::string recipeEffectName;
-			for (auto line : getRecipeLines()) {
+			for (const auto& line : getRecipeLines()) {
 				if (stl::string::icontains(line, "potion") || stl::string::icontains(line, "poison")) {
 					// Note: We are intentionally NOT finding a matching effect because multiple effects can have the same name.
 					// Therefore, we will just check each ingredient's effect's name against the name in the recipe to confirm matches
@@ -75,15 +75,14 @@ namespace Recipe
 
 		void learnIngredients()
 		{
-			auto recipeEffect = getRecipeEffectName();
-			if (recipeEffect != "") {
+			if (const auto recipeEffect = getRecipeEffectName(); !recipeEffect.empty()) {
 				// learn ingredient effects
 				bool learnedEffect = false;
 				for (auto ingredient : getIngredients()) {
 					logger::info("Parsing ingredient: {}", ingredient->GetFullName());
 					std::uint32_t index = 0;
 					
-					for (auto effect : ingredient->effects) {
+					for (const auto effect : ingredient->effects) {
 						logger::info("Check effect {}, against recipeEffect", effect->baseEffect->GetFullName());
 						if (recipeEffect.find(effect->baseEffect->GetFullName()) != std::string::npos && effect->baseEffect->GetFullNameLength() != 0) {
 							if (!hasLearnedEffect(ingredient, index)) {
@@ -108,7 +107,7 @@ namespace Recipe
 			std::string recipeEffectName;
 			auto lines = stl::splitLines(a_out->c_str());
 			std::vector<std::string> newLines;
-			for (auto line : lines) {
+			for (const auto& line : lines) {
 				if (stl::string::icontains(line, "potion") || stl::string::icontains(line, "poison")) {
 					// Note: We are intentionally NOT finding a matching effect because multiple effects can have the same name.
 					// Therefore, we will just check each ingredient's effect's name against the name in the recipe to confirm matches
@@ -121,7 +120,7 @@ namespace Recipe
 			std::vector<RE::IngredientItem*> ingredients;
 			for (auto line : lines) {
 				auto correctedLine = line;
-				if (line.find("~") != std::string::npos) {
+				if (line.find('~') != std::string::npos) {
 					RE::IngredientItem* matchedIngredient = nullptr;
 					for (auto ingredient : DataBase::GetSingleton()->ingredients) {
 						if (stl::string::icontains(line, ingredient->GetFullName())) {
@@ -155,7 +154,7 @@ namespace Recipe
 			return RE::BSString(stl::combineLines(newLines));
 		}
 
-		static RE::IngredientItem* getClosestMatchingIngredient(std::string ingredientToCorrect, std::string recipeEffectName)
+		static RE::IngredientItem* getClosestMatchingIngredient(const std::string& ingredientToCorrect, const std::string& recipeEffectName)
 		{
 			std::pair<RE::IngredientItem*, double> bestIngredientMatch = { nullptr, 0 };
 			for (auto ingredient : DataBase::GetSingleton()->ingredients) {

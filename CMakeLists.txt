@@ -1,7 +1,4 @@
 cmake_minimum_required(VERSION 3.20)
-set(NAME "Recipes")
-set(AUTHOR "nightfallstorm")
-set(VERSION 1.1.0)
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/local-env.cmake)
 	include(${CMAKE_CURRENT_SOURCE_DIR}/local-env.cmake)
@@ -11,6 +8,20 @@ else ()
 			"local-env.cmake not found. This is required for proper linux cross-compiling. See `local-env-TEMPLATE.cmake` for details"
 	)
 endif()
+
+
+# -------------- Project Setup -----------------------
+
+set(NAME "Recipes")
+set(AUTHOR "nightfallstorm")
+set(VERSION 1.1.0)
+
+
+# For Clang-CL only, ensures IDEs like CLION properly see CLIB-NG headers
+add_compile_options(
+		/clang:-isystem/${CLIB_PATH}/include # Custom include to ensure automatic CLIB inclusion
+		/clang:-isystem/${CLIB_PATH}/extern/openvr/headers # Custom include to ensure automatic CLIB inclusion
+)
 
 project(
 	${NAME}

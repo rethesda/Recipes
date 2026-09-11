@@ -1,5 +1,7 @@
 build*/
 /.vs
+
+# Ignore Jetbrains .idea folder+
 .idea/
 
 # Ignore local build environment

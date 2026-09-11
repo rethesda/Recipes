@@ -36,7 +36,8 @@ private:
 	{
 		auto const& [map, lock] = RE::TESForm::GetAllForms();
 		vendorItemRecipeKeyword = RE::TESForm::LookupByID(0x000F5CB0)->As<RE::BGSKeyword>();
-		lock.get().LockForRead();
+
+		const RE::BSReadLockGuard _ { lock };
 		
 		for (auto const& [formid, form] : *map) {
 			if (form->Is(RE::IngredientItem::FORMTYPE)) {
@@ -45,13 +46,11 @@ private:
 				auto name = std::string(form->As<RE::AlchemyItem>()->GetFullName());
 				std::ranges::transform(name, name.begin(), ::toupper);
 				if (name.find("POTION") != std::string::npos || name.find("POISON") != std::string::npos) {
-					for (auto effect : form->As<RE::AlchemyItem>()->effects) {
+					for (const auto effect : form->As<RE::AlchemyItem>()->effects) {
 						effects.insert(effect->baseEffect);
 					}
 				}
 			}
 		}
-
-		lock.get().UnlockForRead();
 	}
 };

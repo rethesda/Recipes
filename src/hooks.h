@@ -67,7 +67,7 @@ struct GetDescriptionHookSE
 			logger::info("Correcting ingredients!");
 #endif
 			auto newText = Recipe::BookRecipe::correctIngredients(a_out);
-			if (newText.size() > 0) {  // Simple size check in case of a bug
+			if (!newText.empty()) {  // Simple size check in case of a bug
 				*a_out = newText;
 			} 
 		}
@@ -148,8 +148,7 @@ struct GetDescriptionHookAE
 #ifdef _DEBUG
 			logger::info("Correcting ingredients");
 #endif
-			auto newText = Recipe::BookRecipe::correctIngredients(a_out);
-			if (newText.size() > 0) {  // Simple size check in case of a bug
+			if (auto newText = Recipe::BookRecipe::correctIngredients(a_out); !newText.empty()) {  // Simple size check in case of a bug
 				*a_out = newText;
 			}
 		}
